@@ -16,6 +16,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	protected double[] scaling;
 	protected double[] translation;
+	
+	List<List<Object>> m_data;
 
 	@Override
 	public String getMatrikelNumbers() {
@@ -24,6 +26,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected void learnModel(List<List<Object>> data) {
+		
 		throw new NotImplementedException();
 	}
 
