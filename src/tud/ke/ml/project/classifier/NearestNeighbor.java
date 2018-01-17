@@ -1,6 +1,7 @@
 package tud.ke.ml.project.classifier;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,10 +27,10 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected void learnModel(List<List<Object>> data) {
-		for(List<Object> instance : data) {
-			m_data.add(instance);
+		m_data = new LinkedList<List<Object>>();
+		for(List<Object> i : data) {
+			m_data.add(new LinkedList<Object>(i));
 		}
-		//throw new NotImplementedException();
 	}
 
 	@Override
