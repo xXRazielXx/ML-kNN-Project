@@ -50,7 +50,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Object vote(List<Pair<List<Object>, Double>> subset) {
-		throw new NotImplementedException();
+		return getWinner(getUnweightedVotes(subset));
+		//throw new NotImplementedException();
 	}
 
 	@Override
