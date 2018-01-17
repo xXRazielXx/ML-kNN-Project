@@ -26,8 +26,10 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected void learnModel(List<List<Object>> data) {
-		
-		throw new NotImplementedException();
+		for(List<Object> instance : data) {
+			m_data.add(instance);
+		}
+		//throw new NotImplementedException();
 	}
 
 	@Override
