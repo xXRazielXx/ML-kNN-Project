@@ -52,7 +52,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Object vote(List<Pair<List<Object>, Double>> subset) {
-		throw new NotImplementedException();
+		return getWinner(getUnweightedVotes(subset));
 	}
 
 	@Override
@@ -64,9 +64,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		//======================================================================
 		//Calculate Distance of every model instance with parameter instance "data"
 		//======================================================================
-		for(List<Object> instance :m_data) {
+		for(List<Object> instance : m_data) {
 			double distance = determineManhattanDistance(instance, data);
-			
 			Pair<List<Object>, Double> pair = 
 					new Pair< List<Object>, Double>(instance, distance);
 			
@@ -75,9 +74,30 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		//======================================================================
 		//Sort List and get first 5 instances (lowest distance)
 		//======================================================================
-		//Collections.sort(pairs, Comparator.comparing(p -> -p.getRight()));
+		Collections.sort(pairs, 
+			new Comparator<Pair<List<Object>, Double>>() {
+				@Override
+				public int compare(Pair<List<Object>, Double> o1, Pair<List<Object>, Double> o2) {
+					//For simplicity -> distance values are read to compare them
+					double val1, val2;
+					val1 = ((Pair<List<Object>, Double>)o2).getB();
+					val2 = ((Pair<List<Object>, Double>)o2).getB();
+					return  val1 == val2 ? 0 : val1 < val2 ? -1 : 1; //sort in descending order
+				}
+			});
 		
-		throw new NotImplementedException();
+		LinkedList<Pair<List<Object>, Double>> bestFive =
+				new LinkedList< Pair< List<Object> , Double >>();
+		
+		//Check if size of Pairs is less than 5 (neccesary? discuss!! :D)
+		int bestN = 5;
+		if(pairs.size() < 5) bestN = pairs.size(); 
+		
+		for(int i = 0; i < bestN; i++) {
+			bestFive.add(pairs.get(i));
+		}
+		
+		return bestFive;
 	}
 
 	@Override
