@@ -1,6 +1,8 @@
 package tud.ke.ml.project.classifier;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +52,31 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Object vote(List<Pair<List<Object>, Double>> subset) {
-		return getWinner(getUnweightedVotes(subset));
-		//throw new NotImplementedException();
+		throw new NotImplementedException();
 	}
 
 	@Override
 	protected List<Pair<List<Object>, Double>> getNearest(List<Object> data) {
+		
+		LinkedList<Pair<List<Object>, Double>> pairs =
+				new LinkedList< Pair< List<Object> , Double >>();
+		
+		//======================================================================
+		//Calculate Distance of every model instance with parameter instance "data"
+		//======================================================================
+		for(List<Object> instance :m_data) {
+			double distance = determineManhattanDistance(instance, data);
+			
+			Pair<List<Object>, Double> pair = 
+					new Pair< List<Object>, Double>(instance, distance);
+			
+			pairs.add(pair);
+		}
+		//======================================================================
+		//Sort List and get first 5 instances (lowest distance)
+		//======================================================================
+		//Collections.sort(pairs, Comparator.comparing(p -> -p.getRight()));
+		
 		throw new NotImplementedException();
 	}
 
