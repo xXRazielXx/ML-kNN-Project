@@ -167,7 +167,26 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected double determineEuclideanDistance(List<Object> instance1, List<Object> instance2) {
-		throw new NotImplementedException();
+		double attribute_dist = 0.0;
+		double euclidean_dist = 0.0;
+		if (instance1.size() != instance2.size()) {
+			throw new IllegalArgumentException("number of instances does not match");
+		 }
+		 
+		for (int i = 0; i < instance2.size(); i++) {
+			if (instance1.get(i) instanceof String && instance2.get(i) instanceof String) {
+				if (((String)instance1.get(i)).equals((String)instance2.get(i))) attribute_dist = 0;
+				else attribute_dist = 1;
+			}
+			else if (instance1.get(i) instanceof Double && instance2.get(i) instanceof Double) {
+				attribute_dist = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
+			}
+			else throw new IllegalArgumentException("class of attributes does not match");
+			
+			euclidean_dist += Math.pow(attribute_dist, 2);
+		}
+
+		return Math.sqrt(euclidean_dist);
 	}
 
 	@Override
