@@ -49,12 +49,24 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 			
 			unweightedVotes.put(instanceClass, unweightedVotes.get(instanceClass) + 1);
 		}
-		throw new NotImplementedException();
+		
+		return unweightedVotes;
 	}
 
 	@Override
 	protected Map<Object, Double> getWeightedVotes(List<Pair<List<Object>, Double>> subset) {
-		throw new NotImplementedException();
+		Map<Object, Double> weightedVotes = new HashMap<Object, Double>();
+		
+		for(Pair<List<Object>,Double> subsetInstance : subset) {
+			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size()); 
+			
+			if(!weightedVotes.containsKey(instanceClass))
+					weightedVotes.put(instanceClass, 0.0);
+			
+			weightedVotes.put(instanceClass, weightedVotes.get(instanceClass) + 1/subsetInstance.getB());
+		}
+		
+		return weightedVotes;
 	}
 
 	@Override
@@ -77,7 +89,9 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Object vote(List<Pair<List<Object>, Double>> subset) {
-		return getWinner(getUnweightedVotes(subset));
+		
+		if(isInverseWeighting()) return getWinner(getWeightedVotes(subset));
+		else return getWinner(getUnweightedVotes(subset));
 	}
 
 	@Override
@@ -90,7 +104,12 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		//Calculate Distance of every model instance with parameter instance "data"
 		//======================================================================
 		for(List<Object> instance : m_data) {
-			double distance = determineManhattanDistance(instance, data);
+			
+			double distance;
+			
+			if(getMetric() == 0) distance = determineEuclideanDistance(instance, data);
+			else distance = determineManhattanDistance(instance, data);
+			
 			Pair<List<Object>, Double> pair = 
 					new Pair< List<Object>, Double>(instance, distance);
 			
