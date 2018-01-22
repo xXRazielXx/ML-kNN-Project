@@ -37,6 +37,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Map<Object, Double> getUnweightedVotes(List<Pair<List<Object>, Double>> subset) {
+		//Count classes in subset
+		
 		throw new NotImplementedException();
 	}
 
@@ -47,7 +49,20 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Object getWinner(Map<Object, Double> votes) {
-		throw new NotImplementedException();
+		//======================================================================
+		//return winner class
+		//======================================================================
+		double maxCount = 0.0;    //Count of winner class
+		Object winnerClass = null;//Class with highest count
+		
+		for (Map.Entry<Object, Double> entry : votes.entrySet())
+		{
+		    if(entry.getValue() > maxCount) {
+		    	maxCount = entry.getValue();
+		    	winnerClass = entry.getKey();
+		    }
+		}
+		return winnerClass;
 	}
 
 	@Override
