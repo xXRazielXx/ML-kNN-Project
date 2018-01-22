@@ -3,6 +3,7 @@ package tud.ke.ml.project.classifier;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,17 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected Map<Object, Double> getUnweightedVotes(List<Pair<List<Object>, Double>> subset) {
-		//Count classes in subset
+
+		Map<Object, Double> unweightedVotes = new HashMap<Object, Double>();
 		
+		for(Pair<List<Object>,Double> subsetInstance : subset) {
+			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size()); 
+			
+			if(!unweightedVotes.containsKey(instanceClass))
+					unweightedVotes.put(instanceClass, 0.0);
+			
+			unweightedVotes.put(instanceClass, unweightedVotes.get(instanceClass) + 1);
+		}
 		throw new NotImplementedException();
 	}
 
