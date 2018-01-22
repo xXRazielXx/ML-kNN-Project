@@ -127,7 +127,24 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected double determineManhattanDistance(List<Object> instance1, List<Object> instance2) {
-		throw new NotImplementedException();
+		double d = 0;
+		if (instance1.size() != instance2.size()) {
+			throw new IllegalArgumentException("number of instances does not match");
+		}
+		for (int i = 0; i < instance2.size(); i++) {
+			if (instance1.get(i) instanceof String && instance2.get(i) instanceof String) {
+				if (((String)instance1.get(i)).equals((String)instance2.get(i))) d = 0;
+				else d = 1;
+			}
+			else throw new IllegalArgumentException("class of attributes does not match");
+			
+			if (instance1.get(i) instanceof Double && instance2.get(i) instanceof Double) {
+				d = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
+			}
+			else throw new IllegalArgumentException("class of attributes does not match");
+		}
+		
+		return d;
 	}
 
 	@Override
