@@ -42,7 +42,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		Map<Object, Double> unweightedVotes = new HashMap<Object, Double>();
 		
 		for(Pair<List<Object>,Double> subsetInstance : subset) {
-			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size()); 
+			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size() -1); 
 			
 			if(!unweightedVotes.containsKey(instanceClass))
 					unweightedVotes.put(instanceClass, 0.0);
@@ -58,7 +58,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		Map<Object, Double> weightedVotes = new HashMap<Object, Double>();
 		
 		for(Pair<List<Object>,Double> subsetInstance : subset) {
-			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size()); 
+			Object instanceClass = subsetInstance.getA().get(subsetInstance.getA().size() -1); 
 			
 			if(!weightedVotes.containsKey(instanceClass))
 					weightedVotes.put(instanceClass, 0.0);
@@ -107,8 +107,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 			
 			double distance;
 			
-			if(getMetric() == 0) distance = determineEuclideanDistance(instance, data);
-			else distance = determineManhattanDistance(instance, data);
+			if(getMetric() == 0) distance = determineManhattanDistance(instance, data);
+			else distance = determineEuclideanDistance(instance, data); 
 			
 			Pair<List<Object>, Double> pair = 
 					new Pair< List<Object>, Double>(instance, distance);
@@ -124,7 +124,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 				public int compare(Pair<List<Object>, Double> o1, Pair<List<Object>, Double> o2) {
 					//For simplicity -> distance values are read to compare them
 					double val1, val2;
-					val1 = ((Pair<List<Object>, Double>)o2).getB();
+					val1 = ((Pair<List<Object>, Double>)o1).getB();
 					val2 = ((Pair<List<Object>, Double>)o2).getB();
 					return  val1 == val2 ? 0 : val1 < val2 ? -1 : 1; //sort in descending order
 				}
@@ -146,23 +146,31 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected double determineManhattanDistance(List<Object> instance1, List<Object> instance2) {
-		double d = 0;
+		double distance = 0;
+		//Check if instances match (size)
 		if (instance1.size() != instance2.size()) {
 			throw new IllegalArgumentException("number of instances does not match");
 		 }
 		 
+		//Check if attribute-types match and cast them to types for calculation
 		for (int i = 0; i < instance2.size(); i++) {
+			double difference = 0.0;
+			//Do not count Class-Attribute
+			if(i == this.getClassAttribute()) continue;
+			
 			if (instance1.get(i) instanceof String && instance2.get(i) instanceof String) {
-				if (((String)instance1.get(i)).equals((String)instance2.get(i))) d = 0;
-				else d = 1;
+				if (((String)instance1.get(i)).equals((String)instance2.get(i))) difference = 0;
+				else difference = 1;
 			}
 			else if (instance1.get(i) instanceof Double && instance2.get(i) instanceof Double) {
-				d = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
+				difference = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
 			}
 			else throw new IllegalArgumentException("class of attributes does not match");
+			
+			distance += difference;
 		}
 
-		return d;
+		return distance;
 	}
 
 	@Override
@@ -174,6 +182,9 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		 }
 		 
 		for (int i = 0; i < instance2.size(); i++) {
+			//Do not count Class-Attribute
+			if(i == this.getClassAttribute()) continue;
+			
 			if (instance1.get(i) instanceof String && instance2.get(i) instanceof String) {
 				if (((String)instance1.get(i)).equals((String)instance2.get(i))) attribute_dist = 0;
 				else attribute_dist = 1;
