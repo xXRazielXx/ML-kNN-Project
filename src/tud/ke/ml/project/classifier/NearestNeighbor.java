@@ -63,7 +63,8 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 			if(!weightedVotes.containsKey(instanceClass))
 					weightedVotes.put(instanceClass, 0.0);
 			
-			weightedVotes.put(instanceClass, weightedVotes.get(instanceClass) + 1/subsetInstance.getB());
+			weightedVotes.put(instanceClass, weightedVotes.get(instanceClass) +(1 - 1/subsetInstance.getB()));
+			
 		}
 		
 		return weightedVotes;
