@@ -1,6 +1,7 @@
 package tud.ke.ml.project.classifier;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,10 +31,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected void learnModel(List<List<Object>> data) {
-		m_data = new LinkedList<List<Object>>();
-		for(List<Object> i : data) {
-			m_data.add(new LinkedList<Object>(i));
-		}
+		m_data = new LinkedList<List<Object>>(data);
 	}
 
 	@Override
@@ -63,7 +61,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 			if(!weightedVotes.containsKey(instanceClass))
 					weightedVotes.put(instanceClass, 0.0);
 			
-			weightedVotes.put(instanceClass, weightedVotes.get(instanceClass) +(1 - 1/subsetInstance.getB()));
+			weightedVotes.put(instanceClass, weightedVotes.get(instanceClass) +(1/subsetInstance.getB()));
 			
 		}
 		
@@ -75,17 +73,59 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		//======================================================================
 		//return winner class
 		//======================================================================
-		double maxCount = 0.0;    //Count of winner class
-		Object winnerClass = null;//Class with highest count
+		double maxCount = 0.0;    								//Count of winner class(es)
+		List<Object> winnerClasses = new ArrayList<Object>();	//Class(es) with highest count
 		
+		//======================================================================
+		//Search for highest votes in map
+		//======================================================================
 		for (Map.Entry<Object, Double> entry : votes.entrySet())
 		{
-		    if(entry.getValue() > maxCount) {
+			if(entry.getValue() == maxCount) {
+		    	winnerClasses.add(entry.getKey());
+		    }
+			if(entry.getValue() > maxCount) {
 		    	maxCount = entry.getValue();
-		    	winnerClass = entry.getKey();
+		    	winnerClasses.clear();
+		    	winnerClasses.add(entry.getKey());
 		    }
 		}
-		return winnerClass;
+		//======================================================================
+		//More than one class has highest votes -> decide for class with highest 
+		//Occurrence(prior) / else decide for the one class
+		//======================================================================
+		/*
+		if (winnerClasses.size() > 1) {
+			Map<Object, Integer> priors = new HashMap<Object, Integer>();
+			//======================================================================
+			//Put win Candidates in Map
+			for (Object winCandidate : winnerClasses) {
+				priors.put(winCandidate, 0);
+			}
+			//=================================================================
+			//Iterate through instances and count if class is candidate class
+			for (List<Object> instance : this.m_data) {
+				Object instanceClass = instance.get(instance.size() -1);	
+				if(priors.containsKey(instanceClass))
+					priors.put(instanceClass, priors.get(instanceClass) + 1);
+			}
+			//=================================================================
+			//Iterate through map and take class with highest prior
+			//re-use variable MaxCount
+			Object win = null;
+			maxCount = 0.0;
+			for (Map.Entry<Object, Integer> entry : priors.entrySet()) {
+				if(entry.getValue() > maxCount) {
+			    	maxCount = entry.getValue();
+			    	win		 = entry.getKey();			    	
+			    }
+			}
+			//Return class with highest prior
+			return win;
+			
+		} 	//else return winner class if only one
+		
+		else */ return winnerClasses.get(0);
 	}
 
 	@Override
@@ -100,13 +140,25 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		
 		LinkedList<Pair<List<Object>, Double>> pairs =
 				new LinkedList< Pair< List<Object> , Double >>();
-		
+
+		double st[][] = normalizationScaling();
+		this.scaling = st[0];
+		this.translation = st[1];
 		//======================================================================
 		//Calculate Distance of every model instance with parameter instance "data"
 		//======================================================================
 		for(List<Object> instance : m_data) {
 			
 			double distance;
+			
+			//Normalizing instance/data - Attributes
+			for(int i = 0; i < instance.size(); i++) {
+				if(!(data.get(i) instanceof String))
+					instance.set(i, ((Double)instance.get(i) + translation[i])*scaling[i]);
+				
+				if(!(data.get(i) instanceof String))
+					data.set(i, ((Double)data.get(i) + translation[i])*scaling[i]);
+			}
 			
 			if(getMetric() == 0) distance = determineManhattanDistance(instance, data);
 			else distance = determineEuclideanDistance(instance, data); 
@@ -203,7 +255,32 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 
 	@Override
 	protected double[][] normalizationScaling() {
-		throw new NotImplementedException();
+		double st[][] = new double[m_data.get(0).size()-1][m_data.get(0).size()-1];
+
+		double minValues[] = new double[m_data.get(0).size()-1];
+		double maxValues[] = new double[m_data.get(0).size()-1];
+		if(isNormalizing()) {
+			for(int i = 0; i < m_data.size() - 1; i++) {
+				for(int j = 0; j < m_data.get(0).size() - 1; j++) {
+					if(!(m_data.get(i).get(j) instanceof String) && i != getClassAttribute()) {
+						
+						//Test -> minValue < als Value der Instanz
+						if((Double)m_data.get(i).get(j) < minValues[j]) {
+							double d = (Double)m_data.get(i).get(j);
+							minValues[j] = (Double)m_data.get(i).get(j);
+						}
+						//Test -> maxValue > als Value der Instanz
+						if((Double)m_data.get(i).get(j) > maxValues[j]) maxValues[j] = (Double)m_data.get(i).get(j);
+					}
+				}
+			}
+		}
+		//Fill scaling and translation array
+		for(int j = 0; j < m_data.get(0).size() - 1; j++) {
+				st[0][j] = 1 / (maxValues[j] - minValues[j]);
+				st[1][j] = -1 * minValues[j];
+		}
+		return st;
 	}
 
 }
