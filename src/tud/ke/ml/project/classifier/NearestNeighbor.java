@@ -149,15 +149,6 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		for(List<Object> instance : m_data) {
 			double distance;
 			
-			//Normalizing instance/data - Attributes
-			if(isNormalizing()) {
-				for(int i = 0; i < instance.size(); i++) {
-					if(data.get(i) instanceof Double) {
-						instance.set(i, ((Double)instance.get(i) + translation[i])*scaling[i]);
-						data    .set(i, ((Double)data    .get(i) + translation[i])*scaling[i]);
-					}
-				}
-			}
 			if(getMetric() == 0) distance = determineManhattanDistance(instance, data);
 			else distance = determineEuclideanDistance(instance, data); 
 			
@@ -200,7 +191,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		if (instance1.size() != instance2.size()) {
 			throw new IllegalArgumentException("number of instances does not match");
 		 }
-		 
+		
 		//Check if attribute-types match and cast them to types for calculation
 		for (int i = 0; i < instance2.size(); i++) {
 			double difference = 0.0d;
@@ -212,7 +203,14 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 				else difference = 1d;
 			}
 			else if (instance1.get(i) instanceof Double && instance2.get(i) instanceof Double) {
-				difference = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
+				if(isNormalizing()) {
+					double i1 = ((Double) instance1.get(i)+translation[i])*scaling[i];
+					double i2 = ((Double) instance2.get(i)+translation[i])*scaling[i];
+					difference = Math.abs(i1-i2);
+				
+				} else difference = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
+				
+				//difference = Math.abs((Double) instance1.get(i) - (Double) instance2.get(i));
 			}
 			else throw new IllegalArgumentException("class of attributes does not match");
 			
@@ -239,7 +237,11 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 				else attribute_dist = 1;
 			}
 			else if (instance1.get(i) instanceof Double && instance2.get(i) instanceof Double) {
-				attribute_dist = Math.pow((Double) instance1.get(i) - (Double) instance2.get(i),2);
+				if(isNormalizing()) {
+				double i1 = ((Double) instance1.get(i)+translation[i])*scaling[i];
+				double i2 = ((Double) instance2.get(i)+translation[i])*scaling[i];
+				 attribute_dist = Math.pow(i1-i2, 2);
+				} else attribute_dist = Math.pow((Double) instance1.get(i) - (Double) instance2.get(i),2);
 			}
 			else throw new IllegalArgumentException("class of attributes does not match");
 			
@@ -258,27 +260,31 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		double maxValues[] = new double[attributeCount];
 		if(isNormalizing()) {
 			//Iterate through instances
-			for(int i = 0; i < m_data.size() - 1; i++) {
+			for(int i = 0; i < m_data.size(); i++) {
 				//Iterate through attributes
-				for(int j = 0; j < attributeCount - 1; j++) {
+				for(int j = 0; j < attributeCount; j++) {
 					if(m_data.get(i).get(j) instanceof Double) {
-						//Test -> minValue < als Value der Instanz
-						if((Double)m_data.get(i).get(j) < minValues[j]) {
+						if(i == 0) {
 							minValues[j] = (Double)m_data.get(i).get(j);
-						}
-						//Test -> maxValue > als Value des Attributs der Instanz
-						if((Double)m_data.get(i).get(j) > maxValues[j]) 
 							maxValues[j] = (Double)m_data.get(i).get(j);
+						} else {
+							//Test -> minValue < als Value der Instanz
+							if((Double)m_data.get(i).get(j) < minValues[j]) {
+								minValues[j] = (Double)m_data.get(i).get(j);
+							}
+							//Test -> maxValue > als Value des Attributs der Instanz
+							if((Double)m_data.get(i).get(j) > maxValues[j]) 
+								maxValues[j] = (Double)m_data.get(i).get(j);
+						}
 					}
 				}
 			}
 		}
 		//Fill scaling and translation array
-		for(int j = 0; j < attributeCount - 1; j++) {
+		for(int j = 0; j < attributeCount; j++) {
 				st[0][j] = (maxValues[j] - minValues[j]) == 0 ? 0 : (Double)(1 / (maxValues[j] - minValues[j]));
 				st[1][j] = -minValues[j];
 		}
 		return st;
 	}
-
 }
