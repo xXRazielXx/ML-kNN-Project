@@ -176,9 +176,14 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 				new LinkedList< Pair< List<Object> , Double >>();
 		
 		int bestK = this.getkNearest();
+		double lastDistance = pairs.get(0).getB();
 		
-		for(int i = 0; i < bestK; i++) {
+		for(int i = 0; ; i++) {
+			
+			if((i >= bestK) && pairs.get(i).getB() > lastDistance) break;
+			
 			nearest.add(pairs.get(i));
+			lastDistance = pairs.get(i).getB();
 		}
 		
 		return nearest;
