@@ -183,18 +183,17 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 				}
 			});
 		
-		LinkedList<Pair<List<Object>, Double>> bestFive =
+		LinkedList<Pair<List<Object>, Double>> nearest =
 				new LinkedList< Pair< List<Object> , Double >>();
 		
 		//Check if size of Pairs is less than 5 (neccesary? discuss!! :D)
-		int bestN = 5;
-		if(pairs.size() < 5) bestN = pairs.size(); 
+		int bestK = this.getkNearest();
 		
-		for(int i = 0; i < bestN; i++) {
-			bestFive.add(pairs.get(i));
+		for(int i = 0; i < bestK; i++) {
+			nearest.add(pairs.get(i));
 		}
 		
-		return bestFive;
+		return nearest;
 	}
 
 	@Override
@@ -262,11 +261,10 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		if(isNormalizing()) {
 			for(int i = 0; i < m_data.size() - 1; i++) {
 				for(int j = 0; j < m_data.get(0).size() - 1; j++) {
-					if(!(m_data.get(i).get(j) instanceof String) && i != getClassAttribute()) {
+					if(!(m_data.get(i).get(j) instanceof String)) {
 						
 						//Test -> minValue < als Value der Instanz
 						if((Double)m_data.get(i).get(j) < minValues[j]) {
-							double d = (Double)m_data.get(i).get(j);
 							minValues[j] = (Double)m_data.get(i).get(j);
 						}
 						//Test -> maxValue > als Value der Instanz
@@ -277,7 +275,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		}
 		//Fill scaling and translation array
 		for(int j = 0; j < m_data.get(0).size() - 1; j++) {
-				st[0][j] = 1 / (maxValues[j] - minValues[j]);
+				st[0][j] = minValues[j] == 0 ? 0 : (Double)(1 / (maxValues[j] - minValues[j]));
 				st[1][j] = -1 * minValues[j];
 		}
 		return st;
