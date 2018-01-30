@@ -139,7 +139,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		
 		LinkedList<Pair<List<Object>, Double>> pairs =
 				new LinkedList< Pair< List<Object> , Double >>();
-
+		
 		double st[][] = normalizationScaling();
 		this.scaling = st[0];
 		this.translation = st[1];
@@ -150,13 +150,14 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 			double distance;
 			
 			//Normalizing instance/data - Attributes
-			for(int i = 0; i < instance.size(); i++) {
-				if(data.get(i) instanceof Double) {
-					instance.set(i, ((Double)instance.get(i) + translation[i])*scaling[i]);
-					data    .set(i, ((Double)data    .get(i) + translation[i])*scaling[i]);
+			if(isNormalizing()) {
+				for(int i = 0; i < instance.size(); i++) {
+					if(data.get(i) instanceof Double) {
+						instance.set(i, ((Double)instance.get(i) + translation[i])*scaling[i]);
+						data    .set(i, ((Double)data    .get(i) + translation[i])*scaling[i]);
+					}
 				}
 			}
-			
 			if(getMetric() == 0) distance = determineManhattanDistance(instance, data);
 			else distance = determineEuclideanDistance(instance, data); 
 			
@@ -275,7 +276,7 @@ public class NearestNeighbor extends INearestNeighbor implements Serializable {
 		//Fill scaling and translation array
 		for(int j = 0; j < attributeCount - 1; j++) {
 				st[0][j] = (maxValues[j] - minValues[j]) == 0 ? 0 : (Double)(1 / (maxValues[j] - minValues[j]));
-				st[1][j] = -1 * minValues[j];
+				st[1][j] = -minValues[j];
 		}
 		return st;
 	}
